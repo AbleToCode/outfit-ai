@@ -1,6 +1,6 @@
 import { FashionAnalysis } from "../types";
 
-const API_PROXY_URL = import.meta.env.VITE_API_PROXY_URL || "/api/analyze";
+const API_PROXY_URL = import.meta.env.DEV && import.meta.env.VITE_API_PROXY_URL ? import.meta.env.VITE_API_PROXY_URL : "/api/analyze";
 
 export const analyzeOutfit = async (base64Image: string): Promise<FashionAnalysis> => {
   const prompt = `
