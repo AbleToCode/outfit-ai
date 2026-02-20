@@ -1,0 +1,7 @@
+{
+  "name": "Outfit",
+  "description": "你的随身造型师 - 专业穿搭分析与建议",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

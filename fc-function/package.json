@@ -1,0 +1,12 @@
+{
+  "name": "outfit-api-proxy",
+  "version": "1.0.0",
+  "description": "API proxy for Outfit app - protects QWEN API key",
+  "main": "index.js",
+  "dependencies": {
+    "openai": "^4.28.0"
+  },
+  "engines": {
+    "node": "18"
+  }
+}
