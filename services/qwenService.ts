@@ -42,13 +42,20 @@ export const analyzeOutfit = async (base64Image: string): Promise<FashionAnalysi
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let errorMsg = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.error) errorMsg = errorData.error;
+      } catch (e) {
+        // ignore parse error if response is not JSON
+      }
+      throw new Error(errorMsg);
     }
 
     const data = await response.json();
     return data.result as FashionAnalysis;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Analysis Error:", error);
-    throw new Error("分析失败，请重试。");
+    throw new Error(error.message || "分析失败，请重连试。");
   }
 };

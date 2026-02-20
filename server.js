@@ -20,20 +20,38 @@ app.use(express.json({ limit: '10mb' }));
 
 // API proxy endpoint
 app.post('/api/analyze', async (req, res) => {
+  if (!process.env.DASHSCOPE_API_KEY) {
+    return res.status(500).json({ error: '服务端未配置 DASHSCOPE_API_KEY (API 密钥缺失)，请在部署平台添加此环境变量。' });
+  }
+
   const { image, prompt } = req.body;
 
+  if (!image) {
+    return res.status(400).json({ error: '未提供图片数据。' });
+  }
+
   try {
-    const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
+    // Attempt to extract MIME type and Base64 data
+    const matches = image.match(/^data:(image\/\w+);base64,(.*)$/);
+    let mimeType = 'image/jpeg';
+    let base64Data = image;
+
+    if (matches && matches.length === 3) {
+      mimeType = matches[1];
+      base64Data = matches[2];
+    } else {
+      base64Data = image.replace(/^data:image\/\w+;base64,/, '');
+    }
 
     const response = await client.chat.completions.create({
-      model: 'qwen3-vl-235b-a22b-instruct',
+      model: 'qwen-vl-max', // Fallback to a generally available vision model if the instructed one isn't working
       messages: [
         {
           role: 'user',
           content: [
             {
               type: 'image_url',
-              image_url: { url: `data:image/jpeg;base64,${base64Data}` },
+              image_url: { url: `data:${mimeType};base64,${base64Data}` },
             },
             {
               type: 'text',
@@ -47,13 +65,14 @@ app.post('/api/analyze', async (req, res) => {
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error('No response content received from service.');
+      throw new Error('未从 AI 模型获取到分析结果。');
     }
 
     res.json({ result: JSON.parse(content) });
   } catch (error) {
     console.error('Analysis Error:', error);
-    res.status(500).json({ error: '分析失败，请重试。' });
+    const errorMessage = error.message || '未知错误';
+    res.status(500).json({ error: `分析失败: ${errorMessage}` });
   }
 });
 
