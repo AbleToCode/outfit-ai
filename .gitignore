@@ -1,1 +1,6 @@
-dist/\nnode_modules/\n.env
+node_modules/
+dist/
+.env
+.env.local
+.env.production
+*.log

@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.env.local
+.env.production
+.git
+debug_pic
+fc-function
+fc-function.zip
+*.md
