@@ -1,12 +1,19 @@
 import express from 'express';
-import { createServer } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import OpenAI from 'openai';
-import { loadEnv } from 'vite';
 
-const env = process.env.NODE_ENV !== 'production' ? loadEnv('development', '.', '') : process.env;
-process.env.DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY || env.DASHSCOPE_API_KEY;
+let localEnv = {};
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    const { loadEnv } = await import('vite');
+    localEnv = loadEnv('development', '.', '');
+  } catch (e) {
+    console.warn('Vite not found, skipping local env load');
+  }
+}
+
+process.env.DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY || localEnv.DASHSCOPE_API_KEY;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -78,11 +85,16 @@ app.post('/api/analyze', async (req, res) => {
 
 // Vite dev server
 if (process.env.NODE_ENV !== 'production') {
-  const vite = await createServer({
-    server: { middlewareMode: true },
-    appType: 'spa',
-  });
-  app.use(vite.middlewares);
+  try {
+    const { createServer } = await import('vite');
+    const vite = await createServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
+    app.use(vite.middlewares);
+  } catch (e) {
+    console.warn('Vite not found, skipping dev server');
+  }
 } else {
   // Serve static files from dist
   app.use(express.static(join(__dirname, 'dist')));
