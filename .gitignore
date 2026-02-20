@@ -4,3 +4,8 @@ dist/
 .env.local
 .env.production
 *.log
+fc-function/
+fc-function.zip
+deploy-fc.bat
+debug_pic/
+outfit-app-working.png
