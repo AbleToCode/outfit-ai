@@ -1,4 +1,4 @@
-FROM node:22-slim AS build
+FROM node:22-slim
 
 WORKDIR /app
 
@@ -7,16 +7,7 @@ RUN npm ci
 
 COPY . .
 RUN npm run build
-
-FROM node:22-slim
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci --omit=dev
-
-COPY --from=build /app/dist ./dist
-COPY server.js .
+RUN npm prune --omit=dev
 
 ENV NODE_ENV=production
 ENV PORT=8080
