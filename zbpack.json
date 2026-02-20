@@ -1,7 +1,4 @@
 {
-    "ignore_builders": [
-        "vite"
-    ],
     "build_command": "npm run build",
-    "start_command": "npm start"
+    "start_command": "NODE_ENV=production node server.js"
 }
